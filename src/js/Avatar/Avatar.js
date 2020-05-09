@@ -50,7 +50,7 @@ class Avatar {
       }
     } else {
       if (this.avatar.position.y >= 2 && this.avatar.position.y <= 2.5) {
-        state.jumping = false;
+        state.isJumping = false;
         this.goingUp = true;
       } else {
         this.avatar.position.y -= 0.5;
@@ -135,7 +135,7 @@ class Avatar {
         else this.rifle.rotation.x += 0.1;
       } else {
         if (this.rifle.rotation.x >= 0 && this.rifle.rotation.x <= 0.1) {
-          state.shooting = false;
+          state.isShooting = false;
           this.recoil = true;
         } else this.rifle.rotation.x -= 0.1;
       }
@@ -145,7 +145,7 @@ class Avatar {
         else this.shotgun.rotation.x += 0.1;
       } else {
         if (this.shotgun.rotation.x >= 0 && this.shotgun.rotation.x <= 0.1) {
-          state.shooting = false;
+          state.isShooting = false;
           this.recoil = true;
         } else this.shotgun.rotation.x -= 0.1;
       }

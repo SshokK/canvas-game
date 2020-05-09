@@ -1,102 +1,90 @@
 import * as Physijs from 'physijs-webpack';
 import * as Three from 'three';
+import State from '../State/State';
+
+const TARGETS = [
+  {
+    direction: 'left',
+    distance: -150
+  },
+  {
+    direction: 'right',
+    distance: -250
+  },
+  {
+    direction: 'left',
+    distance: -350
+  },
+  {
+    direction: 'right',
+    distance: -450
+  }
+];
+
+const FORCE_MAP = {
+  1: 5,
+  2: 10,
+  3: 20,
+  4: 30,
+  5: 50,
+  6: 70,
+  7: 90,
+  8: 100,
+  9: 120
+};
+const DEFAULT_FORCE = 150;
 
 class Enemies {
-  constructor(scene, level) {
+  constructor(scene) {
+    const state = new State();
     this.enemies = [];
     this.countCollitions = [];
     this.direction = [];
-    this.force = 0;
     this.init = true;
     this.countDead = 0;
 
     this.scene = scene;
-
-    if (level == 1) {
-      this.force = 5;
-    } else if (level == 2) {
-      this.force = 10;
-    } else if (level == 3) {
-      this.force = 20;
-    } else if (level == 4) {
-      this.force = 30;
-    } else if (level == 5) {
-      this.force = 50;
-    } else if (level == 6) {
-      this.force = 70;
-    } else if (level == 7) {
-      this.force = 90;
-    } else if (level == 8) {
-      this.force = 100;
-    } else if (level == 9) {
-      this.force = 120;
-    } else {
-      this.force = 150;
-    }
+    this.force = FORCE_MAP[state.level] || DEFAULT_FORCE;
+    this.targets = [];
 
     const loader = new Three.TextureLoader();
-    const diana = loader.load('./imgs/diana.png');
+    const diana = loader.load('./img/diana.png');
 
-    this.mat1 = Physijs.createMaterial(new Three.MeshPhongMaterial({ map: diana }), 0, 0);
-    this.mat2 = Physijs.createMaterial(new Three.MeshPhongMaterial({ map: diana }), 0, 0);
-    this.mat3 = Physijs.createMaterial(new Three.MeshPhongMaterial({ map: diana }), 0, 0);
-    this.mat4 = Physijs.createMaterial(new Three.MeshPhongMaterial({ map: diana }), 0, 0);
+    TARGETS.forEach((target, targetNum) => {
+      const material = Physijs.createMaterial(new Three.MeshPhongMaterial({ map: diana }), 0, 0);
+      const targetModel = new Physijs.BoxMesh(new Three.BoxGeometry(7.5, 10, 1, 1, 1, 1), material, 1);
+      const positionX = target.direction === 'left' ? 100 : -100;
 
-    const objetivo1 = new Physijs.BoxMesh(new Three.BoxGeometry(7.5, 10, 2.5, 1, 1, 1), this.mat1, 1);
-    objetivo1.applyMatrix(new Three.Matrix4().makeTranslation(100, 7, -150));
-    objetivo1.receiveShadow = true;
-    objetivo1.autoUpdateMatrix = false;
-    this.countCollitions.push(0);
-    this.direction.push('left');
-    this.enemies.push(objetivo1);
-    this.scene.add(objetivo1);
-    this.addBulletListener(this.enemies.length - 1);
+      targetModel.applyMatrix(new Three.Matrix4().makeTranslation(positionX, 7, target.distance));
+      targetModel.receiveShadow = true;
+      targetModel.autoUpdateMatrix = false;
 
-    const objetivo2 = new Physijs.BoxMesh(new Three.BoxGeometry(7.5, 10, 2.5, 1, 1, 1), this.mat2, 1);
-    objetivo2.applyMatrix(new Three.Matrix4().makeTranslation(-100, 7, -250));
-    objetivo2.receiveShadow = true;
-    objetivo2.autoUpdateMatrix = false;
-    this.countCollitions.push(0);
-    this.direction.push('right');
-    this.enemies.push(objetivo2);
-    this.scene.add(objetivo2);
-    this.addBulletListener(this.enemies.length - 1);
-
-    const objetivo3 = new Physijs.BoxMesh(new Three.BoxGeometry(7.5, 10, 2.5, 1, 1, 1), this.mat3, 1);
-    objetivo3.applyMatrix(new Three.Matrix4().makeTranslation(100, 7, -350));
-    objetivo3.receiveShadow = true;
-    objetivo3.autoUpdateMatrix = false;
-    this.countCollitions.push(0);
-    this.direction.push('left');
-    this.enemies.push(objetivo3);
-    this.scene.add(objetivo3);
-    this.addBulletListener(this.enemies.length - 1);
-
-    const objetivo4 = new Physijs.BoxMesh(new Three.BoxGeometry(7.5, 10, 2.5, 1, 1, 1), this.mat4, 1);
-    objetivo4.applyMatrix(new Three.Matrix4().makeTranslation(-100, 7, -450));
-    objetivo4.receiveShadow = true;
-    objetivo4.autoUpdateMatrix = false;
-    this.countCollitions.push(0);
-    this.direction.push('right');
-    this.enemies.push(objetivo4);
-    this.scene.add(objetivo4);
-    this.addBulletListener(this.enemies.length - 1);
+      this.countCollitions.push(0);
+      this.direction.push(target.direction);
+      this.enemies.push(targetModel);
+      this.targets.push(targetModel);
+      this.scene.add(targetModel);
+      this.addBulletListener(targetNum);
+    });
 
     return this;
   }
 
   addBulletListener(i) {
-    this.enemies[i].addEventListener('collision', (elOtroObjeto, velocidad, rotacion, normal) => {
-      if (this.countCollitions[i] == 1) {
+    const state = new State();
+
+    this.enemies[i].addEventListener('collision', (elOtroObjeto, velocity, rotation, normal) => {
+      if (this.countCollitions[i] === 1) {
         const sound = new Howl({
           src: ['./sounds/death.mp3'],
           volume: 0.3
         });
         sound.play();
-        this.scene.updateScore(10);
+        state.updateHUD(10);
         this.countDead++;
-        if (this.countDead == 4) {
-          this.scene.level++;
+
+        if (this.countDead === TARGETS.length) {
+          state.level += 1;
           this.scene.newLevel();
         }
       }
@@ -128,12 +116,7 @@ class Enemies {
     }
 
     // Force next level in case it didn't detect a collision
-    if (
-      this.enemies[0].position.z !== -150 &&
-      this.enemies[1].position.z !== -250 &&
-      this.enemies[2].position.z !== -350 &&
-      this.enemies[3].position.z !== -450
-    ) {
+    if (this.enemies.every((enemy, i) => enemy.position.z !== TARGETS[i].distance)) {
       this.scene.level++;
       this.scene.newLevel();
     }

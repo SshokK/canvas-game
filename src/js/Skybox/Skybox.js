@@ -1,32 +1,30 @@
 import * as Three from 'three';
+import { SCENES } from '../LevelManager/LevelManager';
 
-const getSkybox = (level) => [
-  `./imgs/skyboxes/${level}/ft.JPG`,
-  `./imgs/skyboxes/${level}/bk.JPG`,
-  `./imgs/skyboxes/${level}/up.JPG`,
-  `./imgs/skyboxes/${level}/dn.JPG`,
-  `./imgs/skyboxes/${level}/rt.JPG`,
-  `./imgs/skyboxes/${level}/lf.JPG`
+const getSkybox = (name) => [
+  `./img/skyboxes/${name}/ft.JPG`,
+  `./img/skyboxes/${name}/bk.JPG`,
+  `./img/skyboxes/${name}/up.JPG`,
+  `./img/skyboxes/${name}/dn.JPG`,
+  `./img/skyboxes/${name}/rt.JPG`,
+  `./img/skyboxes/${name}/lf.JPG`
 ];
 
 class Skybox extends Three.Object3D {
-  constructor() {
+  constructor(name = SCENES.DAY) {
     super();
 
     this.lenghtxz = 1000;
     this.heighty = 500;
-
     this.skybox = null;
 
     const geometry = new Three.BoxGeometry(this.lenghtxz, this.heighty, this.lenghtxz);
 
     const loader = new Three.TextureLoader();
 
-    const material = getSkybox('day').map(
+    const material = getSkybox(name).map(
       (imagePath) => new Three.MeshBasicMaterial({ map: loader.load(imagePath), side: Three.BackSide })
     );
-
-    console.log(material)
 
     this.skybox = new Three.Mesh(geometry, material);
 

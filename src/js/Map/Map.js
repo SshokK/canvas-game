@@ -7,8 +7,8 @@ class Map {
     this.map = [];
 
     const loader = new Three.TextureLoader();
-    const textureMetal = loader.load('./imgs/metal.jpg');
-    const textureBase = loader.load('./imgs/dirt.jpg');
+    const textureMetal = loader.load('./img/metal.jpg');
+    const textureBase = loader.load('./img/dirt.jpg');
 
     const mat = Physijs.createMaterial(new Three.MeshPhongMaterial({ map: textureMetal }), 0, 0);
     const matBase = Physijs.createMaterial(new Three.MeshPhongMaterial({ map: textureBase }), 0, 0);
