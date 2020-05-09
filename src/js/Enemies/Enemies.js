@@ -80,7 +80,8 @@ class Enemies {
           volume: 0.3
         });
         sound.play();
-        state.updateHUD(10);
+        state.score += 10;
+        state.updateHUD();
         this.countDead++;
 
         if (this.countDead === TARGETS.length) {
@@ -101,6 +102,8 @@ class Enemies {
   }
 
   animate() {
+    const state = new State();
+
     for (let i = 0; i < this.enemies.length; ++i) {
       if (this.enemies[i].position.x >= 100 && this.direction[i] === 'left') {
         this.enemies[i].applyCentralImpulse(new Three.Vector3(-this.force, 0, 0));
@@ -117,7 +120,7 @@ class Enemies {
 
     // Force next level in case it didn't detect a collision
     if (this.enemies.every((enemy, i) => enemy.position.z !== TARGETS[i].distance)) {
-      this.scene.level++;
+      state.level++;
       this.scene.newLevel();
     }
   }

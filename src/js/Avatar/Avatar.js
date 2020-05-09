@@ -1,6 +1,6 @@
 import * as Three from 'three';
 import * as Physijs from 'physijs-webpack';
-import State from '~/js/State/State';
+import State from '../State/State';
 import { MTLLoader, OBJLoader } from 'three-obj-mtl-loader';
 
 class Avatar {
@@ -50,7 +50,7 @@ class Avatar {
       }
     } else {
       if (this.avatar.position.y >= 2 && this.avatar.position.y <= 2.5) {
-        state.isJumping = false;
+        state.jumping = false;
         this.goingUp = true;
       } else {
         this.avatar.position.y -= 0.5;
@@ -129,13 +129,16 @@ class Avatar {
 
   animateWeapon() {
     const state = new State();
+
+    console.log('animate')
+
     if (this.activeWeapon === 0) {
       if (this.recoil) {
         if (this.rifle.rotation.x >= 0.2) this.recoil = false;
         else this.rifle.rotation.x += 0.1;
       } else {
         if (this.rifle.rotation.x >= 0 && this.rifle.rotation.x <= 0.1) {
-          state.isShooting = false;
+          state.shooting = false;
           this.recoil = true;
         } else this.rifle.rotation.x -= 0.1;
       }
@@ -145,7 +148,7 @@ class Avatar {
         else this.shotgun.rotation.x += 0.1;
       } else {
         if (this.shotgun.rotation.x >= 0 && this.shotgun.rotation.x <= 0.1) {
-          state.isShooting = false;
+          state.shooting = false;
           this.recoil = true;
         } else this.shotgun.rotation.x -= 0.1;
       }

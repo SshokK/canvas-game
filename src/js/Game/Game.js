@@ -1,5 +1,7 @@
+import * as Three from 'three';
+import Scene from '../Scene/Scene';
 import State from '../State/State';
-import LevelManager from '../LevelManager/LevelManager';
+import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js';
 
 const POINTER_LOCK_PROPERTIES = ['pointerLockElement', 'mozPointerLockElement', 'webkitPointerLockElement'];
 export const HUD_AMMO_ELEMENT_ID = 'ammo'
@@ -9,9 +11,6 @@ export const HUD_LEVEL_ELEMENT_ID = 'level'
 class Game {
   constructor() {
     const state = new State();
-    this.createHUD();
-
-    this.levelManager = new LevelManager(state.elements.webGLOutputElement);
 
     if (this.doesDocumentHasPointerLock()) {
       this.setPointerLockEvents();
@@ -19,7 +18,20 @@ class Game {
       this.setInstructions('Your browser doesn\'t seem to support Pointer Lock API');
     }
     this.setWindowEventListeners();
+    this.createHUD();
+
+    this.camera = new Three.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    this.renderer = this.createRenderer();
+    state.elements.webGLOutputElement.append(this.renderer.domElement);
+
+    // Create a scene, that will hold all our elements such as objects, cameras and lights.
+    this.scene = new Scene(this.renderer.domElement, this.camera);
+    state.controls = new PointerLockControls(this.camera);
+    this.scene.add(state.controls.getObject());
+
+    this.render();
   }
+
 
   setInstructions = (message) => {
     const state = new State();
@@ -32,8 +44,8 @@ class Game {
 
     if (state.enableControls) {
       if (event.buttons === 1 && state.elements.blockerDOMElement.style.display === 'none') {
-        this.levelManager.currentScene.shoot();
-        state.isShooting = true;
+        this.scene.shoot();
+        state.shooting = true;
       }
     }
   };
@@ -59,17 +71,17 @@ class Game {
       }
 
       if ([32].includes(event.keyCode)) {
-        state.isJumping = true;
+        state.jumping = true;
       }
 
       if ([81].includes(event.keyCode)) {
-        if (!state.isShooting) {
-          this.levelManager.currentScene.changeWeapon();
+        if (!state.shooting) {
+          this.scene.changeWeapon();
         }
       }
     } else {
       if ([80].includes(event.keyCode)) {
-        this.levelManager.currentScene.newGame();
+        this.scene.newGame();
       }
     }
   };
@@ -100,14 +112,33 @@ class Game {
     const state = new State();
 
     if (state.enableControls) {
-      if (!state.isShooting) {
-        this.levelManager.currentScene.changeWeapon();
-      }
+      if (!state.shooting) this.scene.changeWeapon();
     }
   };
 
   handleWindowResize = () => {
-    this.levelManager.resizeRenderer();
+    this.scene.setCameraAspect(window.innerWidth / window.innerHeight);
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+  };
+
+  /**
+   * @return {WebGLRenderer} - The renderer
+   */
+  createRenderer = () => {
+    const renderer = new Three.WebGLRenderer();
+    renderer.setClearColor(new Three.Color(0xeeeeee), 1.0);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+    renderer.shadowMap.enabled = true;
+    return renderer;
+  };
+
+  render = () => {
+    requestAnimationFrame(this.render);
+
+    this.scene.animate();
+    this.renderer.render(this.scene, this.scene.getCamera());
   };
 
   doesDocumentHasPointerLock = () => {

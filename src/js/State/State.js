@@ -45,8 +45,8 @@ class State {
   moveBackward = INITIAL_STATE.MOVE_BACKWARD;
   moveLeft = INITIAL_STATE.MOVE_LEFT;
   moveRight = INITIAL_STATE.MOVE_RIGHT;
-  isJumping = INITIAL_STATE.IS_JUMPING;
-  isShooting = INITIAL_STATE.IS_SHOOTING;
+  jumping = INITIAL_STATE.IS_JUMPING;
+  shooting = INITIAL_STATE.IS_SHOOTING;
 
   level = INITIAL_STATE.LEVEL;
   maxBullets = INITIAL_STATE.MAX_BULLETS;
@@ -63,16 +63,15 @@ class State {
   }
 
   updateHUD = (score) => {
-    const state = new State();
     const ammoElement = document.getElementById(HUD_AMMO_ELEMENT_ID);
-    ammoElement.innerHTML = 'Ammunition: ' + state.actualAmmo;
+    ammoElement.innerHTML = 'Ammunition: ' + this.actualAmmo;
 
-    const newScore = score === undefined ? state.score : score;
+    const newScore = score === undefined ? this.score : score;
     const scoreElement = document.getElementById(HUD_SCORE_ELEMENT_ID);
     scoreElement.innerHTML = 'Score: ' + newScore;
 
     const levelElement = document.getElementById(HUD_LEVEL_ELEMENT_ID);
-    levelElement.innerHTML = 'Level: ' + state.level;
+    levelElement.innerHTML = 'Level: ' + this.level;
   }
 }
 

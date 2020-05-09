@@ -9,24 +9,20 @@ import Bullets from '../Bullets/Bullets';
 import Enemies from '../Enemies/Enemies';
 
 class Scene extends Physijs.Scene {
-  constructor(name, aCamera) {
+  constructor(renderer, aCamera) {
     super();
     const state = new State();
     this.setGravity(new Three.Vector3(0, -50, 0));
 
     this.camera = aCamera;
-    this.name = name;
+    this.createCrosshair(renderer);
 
     this.avatar = null;
     this.map = null;
     this.enemies = null;
     this.skybox = null;
-    this.Bullets = null;
+    this.bullets = null;
     this.index = 0;
-    this.maxBullets = 20;
-    state.actualAmmo = 40;
-    this.score = 0;
-    this.lastScore = 0;
 
     this.createAvatar();
     this.avatar.loadWeapons();
@@ -40,15 +36,31 @@ class Scene extends Physijs.Scene {
 
     this.add(this.place);
   }
+  // / It creates the camera and adds it to the graph
+  /**
+   * @param renderer - The renderer associated with the camera
+   */
+  createCrosshair(renderer) {
+    // Create the Crosshair
+    const crosshair = new Crosshair();
+    this.camera.add(crosshair);
+
+    // Place it in the center
+    const crosshairPercentX = 50;
+    const crosshairPercentY = 50;
+    const crosshairPositionX = (crosshairPercentX / 100) * 2 - 1;
+    const crosshairPositionY = (crosshairPercentY / 100) * 2 - 1;
+    crosshair.position.set(crosshairPercentX, crosshairPositionY, -0.3);
+  }
 
   shoot() {
     const state = new State();
 
-    if (this.index >= this.maxBullets) {
+    if (this.index >= state.maxBullets) {
       this.index = 0;
       this.bullets.reload();
     }
-    if (!state.isShooting) {
+    if (!state.shooting) {
       this.bullets.shoot(
         this.index,
         this.avatar.getPosition(),
@@ -110,9 +122,10 @@ class Scene extends Physijs.Scene {
    *
    */
   createBullets() {
+    const state = new State()
     const loader = new Three.TextureLoader();
     const texture = loader.load('./imgs/bullettext.jpg');
-    this.bullets = new Bullets(this.maxBullets, this, new Three.MeshPhongMaterial({ map: texture }));
+    this.bullets = new Bullets(state.maxBullets, this, new Three.MeshPhongMaterial({ map: texture }));
   }
 
   // / It creates the enemies
@@ -120,7 +133,9 @@ class Scene extends Physijs.Scene {
    *
    */
   createEnemies() {
-    this.enemies = new Enemies(this);
+    const state = new State();
+
+    this.enemies = new Enemies(this, state.level);
   }
 
   endGame() {
@@ -133,13 +148,13 @@ class Scene extends Physijs.Scene {
     state.moveBackward = false;
     state.moveLeft = false;
     state.moveRight = false;
-    state.isJumping = false;
+    state.jumping = false;
 
     state.elements.blockerDOMElement.style.display = 'block';
     state.elements.instructionsDOMElement.style.display = '';
     state.elements.instructionsDOMElement.style.fontSize = '50px';
     state.elements.instructionsDOMElement.innerHTML =
-      'TotalScore : ' + this.score + ', press the P key to play another game';
+      'TotalScore : ' + state.score + ', press the P key to play another game';
   }
 
   // /
@@ -148,6 +163,9 @@ class Scene extends Physijs.Scene {
    */
   animate() {
     const state = new State();
+
+    console.log(state.shooting)
+
     this.simulate();
 
     if (state.moveForward) this.avatar.moveForward();
@@ -159,7 +177,8 @@ class Scene extends Physijs.Scene {
       this.avatar.jump();
     }
 
-    if (state.isShooting) {
+    if (state.shooting) {
+      console.log(state.shooting)
       this.avatar.animateWeapon();
     }
 
@@ -167,7 +186,7 @@ class Scene extends Physijs.Scene {
 
     this.enemies.animate();
 
-    if (state.actualAmmo == 0) {
+    if (state.actualAmmo === 0) {
       this.endGame();
     }
   }
@@ -202,12 +221,12 @@ class Scene extends Physijs.Scene {
   }
 
   newLevel() {
-    const state = new State()
+    const state = new State();
 
     this.avatar.setInitialPosition();
 
-    if (this.score - this.lastScore != 40) {
-      this.score = this.lastScore + 40;
+    if (state.score - state.lastScore !== 40) {
+      state.score = state.lastScore + 40;
     }
 
     state.updateHUD();
@@ -216,7 +235,7 @@ class Scene extends Physijs.Scene {
       this.remove(this.enemies.getEnemies(i));
     }
     this.createEnemies();
-    this.lastScore = this.score;
+    state.lastScore = state.score;
   }
 
   newGame() {
@@ -228,9 +247,9 @@ class Scene extends Physijs.Scene {
 
     this.avatar.setInitialPosition();
     state.actualAmmo = 40;
-    this.score = 0;
-    state.updateHUD(0);
+    state.score = 0;
     state.level = 1;
+    state.updateHUD();
 
     for (let i = 0; i < this.enemies.getEnemiesSize(); ++i) {
       this.remove(this.enemies.getEnemies(i));
