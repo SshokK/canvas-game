@@ -154,7 +154,7 @@ class Scene extends Physijs.Scene {
     state.elements.instructionsDOMElement.style.display = '';
     state.elements.instructionsDOMElement.style.fontSize = '50px';
     state.elements.instructionsDOMElement.innerHTML =
-      'TotalScore : ' + state.score + ', press the P key to play another game';
+      'TotalScore : ' + state.score + ', press the P key to play one time. <br> Or press B to sign out';
   }
 
   // /

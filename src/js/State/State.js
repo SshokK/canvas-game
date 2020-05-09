@@ -29,33 +29,37 @@ const INITIAL_STATE = {
 };
 
 class State {
-  elements = {
-    blockerDOMElement: INITIAL_STATE.DOM_ELEMENTS.BLOCKER,
-    mainDOMElement: INITIAL_STATE.DOM_ELEMENTS.MAIN,
-    statsDOMElement: INITIAL_STATE.DOM_ELEMENTS.STATS,
-    messagesDOMElement: INITIAL_STATE.DOM_ELEMENTS.MESSAGES,
-    instructionsDOMElement: INITIAL_STATE.DOM_ELEMENTS.INSTRUCTIONS,
-    titleDOMElement: INITIAL_STATE.DOM_ELEMENTS.TITLE,
-    webGLOutputElement: INITIAL_STATE.DOM_ELEMENTS.WEBGL
-  };
-  controls = INITIAL_STATE.CONTROLS;
-  enableControls = INITIAL_STATE.ENABLE_CONTROLS;
-  controlsEnabled = INITIAL_STATE.CONTROLS_ENABLED;
-  moveForward = INITIAL_STATE.MOVE_FORWARD;
-  moveBackward = INITIAL_STATE.MOVE_BACKWARD;
-  moveLeft = INITIAL_STATE.MOVE_LEFT;
-  moveRight = INITIAL_STATE.MOVE_RIGHT;
-  jumping = INITIAL_STATE.IS_JUMPING;
-  shooting = INITIAL_STATE.IS_SHOOTING;
+  setInitialState = () => {
+    stateInstance = null;
+    this.elements = {
+      blockerDOMElement: INITIAL_STATE.DOM_ELEMENTS.BLOCKER,
+      mainDOMElement: INITIAL_STATE.DOM_ELEMENTS.MAIN,
+      statsDOMElement: INITIAL_STATE.DOM_ELEMENTS.STATS,
+      messagesDOMElement: INITIAL_STATE.DOM_ELEMENTS.MESSAGES,
+      instructionsDOMElement: INITIAL_STATE.DOM_ELEMENTS.INSTRUCTIONS,
+      titleDOMElement: INITIAL_STATE.DOM_ELEMENTS.TITLE,
+      webGLOutputElement: INITIAL_STATE.DOM_ELEMENTS.WEBGL
+    };
+    this.controls = INITIAL_STATE.CONTROLS;
+    this.enableControls = INITIAL_STATE.ENABLE_CONTROLS;
+    this.controlsEnabled = INITIAL_STATE.CONTROLS_ENABLED;
+    this.moveForward = INITIAL_STATE.MOVE_FORWARD;
+    this.moveBackward = INITIAL_STATE.MOVE_BACKWARD;
+    this.moveLeft = INITIAL_STATE.MOVE_LEFT;
+    this.moveRight = INITIAL_STATE.MOVE_RIGHT;
+    this.jumping = INITIAL_STATE.IS_JUMPING;
+    this.shooting = INITIAL_STATE.IS_SHOOTING;
 
-  level = INITIAL_STATE.LEVEL;
-  maxBullets = INITIAL_STATE.MAX_BULLETS;
-  actualAmmo = INITIAL_STATE.ACTUAL_AMMO;
-  score = INITIAL_STATE.SCORE;
-  lastScore = INITIAL_STATE.LAST_SCORE;
+    this.level = INITIAL_STATE.LEVEL;
+    this.maxBullets = INITIAL_STATE.MAX_BULLETS;
+    this.actualAmmo = INITIAL_STATE.ACTUAL_AMMO;
+    this.score = INITIAL_STATE.SCORE;
+    this.lastScore = INITIAL_STATE.LAST_SCORE;
+  }
 
   constructor(params) {
     if (!stateInstance) {
+      this.setInitialState();
       this.elements = params.elements;
       stateInstance = this;
     }

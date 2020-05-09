@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "watch-api": "nodemon --inspect -r esm index.js",
     "watch": "node scripts/start.js",
     "build": "node scripts/build.js",
     "test": "node scripts/test.js",
@@ -10,6 +11,7 @@
     "lint": "eslint --ext .js,.jsx,.ts,.tsx src --color --fix",
     "format": "prettier --write src/**/*.{js,jsx,ts,tsx,scss,css,json}"
   },
+  "proxy": "http://localhost:8000",
   "dependencies": {
     "@babel/core": "7.9.0",
     "@svgr/webpack": "4.3.3",
@@ -75,8 +77,14 @@
     "webpack-manifest-plugin": "2.2.0",
     "workbox-webpack-plugin": "4.3.1",
     "worker-loader": "^2.0.0",
-
+    "axios": "^0.19.2",
     "express": "^4.17.1",
+    "pg": "^7.18.2",
+    "errorhandler": "^1.5.1",
+    "body-parser": "^1.19.0",
+    "compression": "^1.7.4",
+    "esm": "^3.2.25",
+    "nodemon": "^2.0.3",
 
     "@hapi/ammo": "^5.0.1",
     "dat.gui": "^0.7.7",

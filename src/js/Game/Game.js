@@ -4,9 +4,9 @@ import State from '../State/State';
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js';
 
 const POINTER_LOCK_PROPERTIES = ['pointerLockElement', 'mozPointerLockElement', 'webkitPointerLockElement'];
-export const HUD_AMMO_ELEMENT_ID = 'ammo'
-export const HUD_SCORE_ELEMENT_ID = 'score'
-export const HUD_LEVEL_ELEMENT_ID = 'level'
+export const HUD_AMMO_ELEMENT_ID = 'ammo';
+export const HUD_SCORE_ELEMENT_ID = 'score';
+export const HUD_LEVEL_ELEMENT_ID = 'level';
 
 class Game {
   constructor() {
@@ -31,7 +31,6 @@ class Game {
 
     this.render();
   }
-
 
   setInstructions = (message) => {
     const state = new State();
@@ -135,11 +134,29 @@ class Game {
   };
 
   render = () => {
-    requestAnimationFrame(this.render);
+    this.requestId = requestAnimationFrame(this.render);
 
     this.scene.animate();
     this.renderer.render(this.scene, this.scene.getCamera());
   };
+
+  stopRender = () => {
+    const state = new State();
+
+    cancelAnimationFrame(this.requestId);
+
+    window.removeEventListener('resize', this.handleWindowResize);
+    window.removeEventListener('mousedown', this.handleMouseDown, true);
+    window.removeEventListener('keydown', this.handleKeyDown, true);
+    window.removeEventListener('keyup', this.handleKeyUp, true);
+    window.removeEventListener('mousewheel', this.handleMouseDown, true); // For Chrome and others
+    window.removeEventListener('DOMMouseScroll', this.handleMouseWheel, true);
+
+    document.removeEventListener('pointerlockchange', this.handlePointerLockChange, false);
+    document.removeEventListener('pointerlockerror', this.handlePointerLockError, false);
+
+    document.exitPointerLock();
+  }
 
   doesDocumentHasPointerLock = () => {
     return POINTER_LOCK_PROPERTIES.some((lockProperty) => lockProperty in document);
@@ -156,9 +173,9 @@ class Game {
       state.controlsEnabled = true;
       state.controls.enabled = true;
       state.enableControls = true;
-      state.elements.blockerDOMElement.style.display = 'none'
+      state.elements.blockerDOMElement.style.display = 'none';
     } else {
-      state.elements.blockerDOMElement.style.display = 'block'
+      state.elements.blockerDOMElement.style.display = 'block';
       state.elements.instructionsDOMElement.style.display = '';
       state.elements.instructionsDOMElement.style.fontSize = '50px';
       state.elements.instructionsDOMElement.innerHTML = 'Pause';
@@ -174,16 +191,10 @@ class Game {
     state.elements.instructionsDOMElement.style.display = '';
   };
 
-
   handleInstructionsClick = () => {
     const state = new State();
 
     state.elements.instructionsDOMElement.style.display = 'none';
-
-    state.elements.mainDOMElement.requestPointerLock =
-      state.elements.mainDOMElement.requestPointerLock ||
-      state.elements.mainDOMElement.mozRequestPointerLock ||
-      state.elements.mainDOMElement.webkitRequestPointerLock;
     state.elements.mainDOMElement.requestPointerLock();
   };
 
@@ -191,12 +202,7 @@ class Game {
     const state = new State();
 
     document.addEventListener('pointerlockchange', this.handlePointerLockChange, false);
-    document.addEventListener('mozpointerlockchange', this.handlePointerLockChange, false);
-    document.addEventListener('webkitpointerlockchange', this.handlePointerLockChange, false);
-
     document.addEventListener('pointerlockerror', this.handlePointerLockError, false);
-    document.addEventListener('mozpointerlockerror', this.handlePointerLockError, false);
-    document.addEventListener('webkitpointerlockerror', this.handlePointerLockError, false);
 
     state.elements.instructionsDOMElement.addEventListener('click', this.handleInstructionsClick, false);
   };

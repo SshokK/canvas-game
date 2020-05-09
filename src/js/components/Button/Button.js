@@ -1,10 +1,6 @@
 import React from 'react';
 import { Button as MaterialButton } from '@material-ui/core';
 
-const BUTTON_TYPES = {
-  DEFAULT: 'contianed'
-};
-
 const Button = (props) => {
   const { type, color, children, endIcon, startIcon, ...restProps } = props;
 
