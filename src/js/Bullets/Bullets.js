@@ -1,6 +1,8 @@
 import * as Three from 'three';
 import * as Physijs from 'physijs-webpack';
 import { Howl } from 'howler';
+import { SCENES, SCENES_MAP } from '../LevelManager/LevelManager';
+import State from '../State/State';
 
 class Bullets {
   constructor(maxBullets, scene, aMaterial) {
@@ -63,6 +65,8 @@ class Bullets {
   }
 
   shoot(i, position, target, weapon) {
+    const state = new State();
+
     this.target[i].set(target.x, target.y, target.z);
     this.bullets[i].position.set(position.x - target.x, position.y + 5, position.z - target.z);
 

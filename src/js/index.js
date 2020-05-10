@@ -8,7 +8,8 @@ import {
   ExpansionPanelSummary,
   ExpansionPanel,
   ExpansionPanelDetails,
-  Typography
+  Typography,
+  Dialog
 } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import '../static/css/global.scss';
@@ -28,7 +29,9 @@ class App extends React.Component {
     topPlayers: [],
     isLoading: false,
     isSignInMode: true,
-    isAuthorized: false
+    isAuthorized: false,
+    isModalOpen: false,
+    error: ''
   };
 
   componentDidMount = () => {
@@ -62,6 +65,13 @@ class App extends React.Component {
     });
   };
 
+  toggleError = (error) => {
+    this.setState({
+      isModalOpen: !this.state.isModalOpen,
+      error: error
+    })
+  }
+
   fetchTopUsers = () => {
     this.setState(
       {
@@ -86,7 +96,7 @@ class App extends React.Component {
         ammo: ammo,
         level: level
       })
-      .then(this.fetchTopUsers);
+      .then(this.fetchTopUsers)
   };
 
   fetchUserData = () => {
@@ -108,7 +118,10 @@ class App extends React.Component {
           }
         });
       })
-      .catch(() => this.toggleLoading());
+      .catch(() => {
+        this.toggleError('Wrong name or password')
+        this.toggleLoading()
+      });
   };
 
   createUser = () => {
@@ -135,9 +148,15 @@ class App extends React.Component {
                 score: res.data.score
               }
             });
+          })
+          .catch(() => {
+            this.toggleError('Wrong name or password')
           });
       })
-      .catch(() => this.toggleLoading());
+      .catch(() => {
+        this.toggleError('User with such name already exists')
+        this.toggleLoading()
+      });
   };
 
   handleNameChange = (e) => {
@@ -190,6 +209,11 @@ class App extends React.Component {
 
     return (
       <>
+        <Dialog open={this.state.isModalOpen} onClose={() => this.toggleError()}>
+          <div className={'dialog'}>
+            {this.state.error}
+          </div>
+        </Dialog>
         <div className={'title'}>Shooting Range</div>
         <div className={'stats__wrapper'}>
           <Fade in={!!topPlayers.length}>

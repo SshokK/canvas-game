@@ -24,7 +24,7 @@ const getScenesMap = (camera) => ({
   [SCENES.NIGHT]: new Scene(SCENES.NIGHT, camera),
   [SCENES.FOG]: new Scene(SCENES.FOG, camera)
 });
-const SCENES_MAP = [
+export const SCENES_MAP = [
   {
     1: SCENES.DAY,
     2: SCENES.DAY,

@@ -1,56 +1,45 @@
 import * as Physijs from 'physijs-webpack';
 import * as Three from 'three';
 import State from '../State/State';
-import Crosshair from '../Crosshair/Crosshair';
 import Avatar from '../Avatar/Avatar';
-import Skybox from '../Skybox/Skybox';
 import Map from '../Map/Map';
 import Bullets from '../Bullets/Bullets';
 import Enemies from '../Enemies/Enemies';
+import { SCENES } from '../LevelManager/LevelManager';
+
+
+export const SCENES_MAP = {
+  1: SCENES.DAY,
+  2: SCENES.NIGHT,
+  3: SCENES.FOG,
+  4: SCENES.DAY,
+  5: SCENES.NIGHT,
+  6: SCENES.FOG,
+  7: SCENES.DAY
+}
 
 class Scene extends Physijs.Scene {
   constructor(renderer, aCamera) {
     super();
-    const state = new State();
     this.setGravity(new Three.Vector3(0, -50, 0));
 
     this.camera = aCamera;
-    this.createCrosshair(renderer);
 
     this.avatar = null;
     this.map = null;
     this.enemies = null;
-    this.skybox = null;
     this.bullets = null;
     this.index = 0;
 
     this.createAvatar();
     this.avatar.loadWeapons();
-    this.place = this.createPlace();
-    this.createBullets();
-    this.createEnemies(state.level);
 
-    this.ambientLight = null;
-    this.spotLight = null;
-    this.createLights();
+    this.place = new Three.Object3D();
+    this.createMap();
+    this.createBullets();
+    this.createEnemies();
 
     this.add(this.place);
-  }
-  // / It creates the camera and adds it to the graph
-  /**
-   * @param renderer - The renderer associated with the camera
-   */
-  createCrosshair(renderer) {
-    // Create the Crosshair
-    const crosshair = new Crosshair();
-    this.camera.add(crosshair);
-
-    // Place it in the center
-    const crosshairPercentX = 50;
-    const crosshairPercentY = 50;
-    const crosshairPositionX = (crosshairPercentX / 100) * 2 - 1;
-    const crosshairPositionY = (crosshairPercentY / 100) * 2 - 1;
-    crosshair.position.set(crosshairPercentX, crosshairPositionY, -0.3);
   }
 
   shoot() {
@@ -73,54 +62,28 @@ class Scene extends Physijs.Scene {
     }
   }
 
-  // / It creates lights and adds them to the graph
-  createLights() {
-    // add subtle ambient lighting
-    this.ambientLight = new Three.AmbientLight(0xccddee, 0.35);
-    this.add(this.ambientLight);
 
-    // add spotlight for the shadows
-    this.spotLight = new Three.SpotLight(0xffffff);
-    this.spotLight.position.set(0, 500, 1000);
-    this.spotLight.intensity = 1;
-    this.spotLight.castShadow = true;
-    // the shadow resolution
-    this.spotLight.shadow.mapSize.width = 2048;
-    this.spotLight.shadow.mapSize.height = 2048;
-    this.add(this.spotLight);
-  }
+  createMap() {
+    const state = new State()
 
-  // / It creates the place
-  /**
-   * @return place
-   */
-  createPlace() {
-    const place = new Three.Object3D();
+    this.map = new Map(SCENES_MAP[state.level] || SCENES.DAY);
 
-    this.skybox = new Skybox();
-    place.add(this.skybox);
-
-    // Creates the map
-    this.map = new Map();
     for (let i = 0; i < this.map.getMapSize(); ++i) {
       this.add(this.map.getMap(i));
     }
 
-    return place;
+    if (SCENES_MAP[state.level] === SCENES.FOG) {
+      const color = 0xFFFFFF;
+      const fog = new Three.Fog(color, 150, 400);
+      console.log(this, fog)
+      this.fog = fog
+    }
   }
 
-  // / It creates the avatar
-  /**
-   *
-   */
   createAvatar() {
     this.avatar = new Avatar(this.camera, this);
   }
 
-  // / It creates the bullets
-  /**
-   *
-   */
   createBullets() {
     const state = new State()
     const loader = new Three.TextureLoader();
@@ -128,13 +91,8 @@ class Scene extends Physijs.Scene {
     this.bullets = new Bullets(state.maxBullets, this, new Three.MeshPhongMaterial({ map: texture }));
   }
 
-  // / It creates the enemies
-  /**
-   *
-   */
   createEnemies() {
     const state = new State();
-
     this.enemies = new Enemies(this, state.level);
   }
 
@@ -157,14 +115,8 @@ class Scene extends Physijs.Scene {
       'TotalScore : ' + state.score + ', press the P key to play one time. <br> Or press B to sign out';
   }
 
-  // /
-  /**
-   * @controls - The GUI information
-   */
   animate() {
     const state = new State();
-
-    console.log(state.shooting)
 
     this.simulate();
 
@@ -178,7 +130,6 @@ class Scene extends Physijs.Scene {
     }
 
     if (state.shooting) {
-      console.log(state.shooting)
       this.avatar.animateWeapon();
     }
 
@@ -195,26 +146,14 @@ class Scene extends Physijs.Scene {
     this.avatar.changeWeapon();
   }
 
-  // / It returns the camera
-  /**
-   * @return The camera
-   */
   getCamera() {
     return this.camera;
   }
 
-  // / It returns the camera controls
-  /**
-   * @return The camera controls
-   */
   getCameraControls() {
     return this.controls;
   }
 
-  // / It updates the aspect ratio of the camera
-  /**
-   * @param anAspectRatio - The new aspect ratio for the camera
-   */
   setCameraAspect(anAspectRatio) {
     this.camera.aspect = anAspectRatio;
     this.camera.updateProjectionMatrix();
@@ -230,12 +169,21 @@ class Scene extends Physijs.Scene {
     }
 
     state.updateHUD();
+    this.removeMap();
+    this.createMap();
+    this.createEnemies();
+    state.lastScore = state.score;
+  }
 
+  removeMap = () => {
     for (let i = 0; i < this.enemies.getEnemiesSize(); ++i) {
       this.remove(this.enemies.getEnemies(i));
     }
-    this.createEnemies();
-    state.lastScore = state.score;
+    for (let i = 0; i < this.map.getMapSize(); ++i) {
+      this.remove(this.map.getMap(i));
+    }
+
+    this.fog = undefined;
   }
 
   newGame() {
@@ -251,9 +199,8 @@ class Scene extends Physijs.Scene {
     state.level = 1;
     state.updateHUD();
 
-    for (let i = 0; i < this.enemies.getEnemiesSize(); ++i) {
-      this.remove(this.enemies.getEnemies(i));
-    }
+    this.removeMap();
+    this.createMap();
     this.createEnemies();
   }
 }

@@ -60,7 +60,7 @@ const updateScoreInDatabase = async (scoreId, newTotal, ammo, newLevel) => {
 
     await sqlQuery(`
     UPDATE
-    score SET (total, targets_hit, level) = (${+total > +newTotal ? +total : +newTotal}, ${+targets_hit + +ammo}, ${+newLevel > +level ? +newLevel : +level})`);
+    score SET (total, targets_hit, level) = (${+total > +newTotal ? +total : +newTotal}, ${+targets_hit + +ammo}, ${+newLevel > +level ? +newLevel : +level}) WHERE id = ${scoreId}`);
   }
 };
 
@@ -84,7 +84,7 @@ const getTopUsers = async () => {
       users_2.id
     ORDER BY 
       score.total 
-    ASC
+    DESC
     LIMIT 10`);
   return users;
 };

@@ -10,8 +10,11 @@ class Avatar {
     this.avatar.material.transparent = true;
     this.avatar.material.opacity = 0.0;
     this.avatar.position.y = 2.5;
+    this.avatar.position.z = -50;
     this.avatar.__dirtyPosition = true;
+
     scene.add(this.avatar);
+
     this.camera = camera;
     this.activeWeapon = null;
     this.goingUp = true;
@@ -130,8 +133,6 @@ class Avatar {
   animateWeapon() {
     const state = new State();
 
-    console.log('animate')
-
     if (this.activeWeapon === 0) {
       if (this.recoil) {
         if (this.rifle.rotation.x >= 0.2) this.recoil = false;
@@ -156,20 +157,17 @@ class Avatar {
   }
 
   loadWeapons = () => {
-    const thatCamera = this.camera;
-    const that = this;
-
     const mtlLoader = new MTLLoader();
     const objLoader = new OBJLoader();
     let texture = null;
 
     mtlLoader.setPath('./models');
-    mtlLoader.load('material.mtl', function(materials) {
+    mtlLoader.load('material.mtl', (materials) => {
       materials.preload();
 
       objLoader.setMaterials(materials);
       objLoader.setPath('models/');
-      objLoader.load('m4a1.obj', function(object) {
+      objLoader.load('m4a1.obj', (object) => {
         texture = Three.ImageUtils.loadTexture('./models/m4a1.png');
         object.children[1].material = new Three.MeshLambertMaterial({ map: texture });
 
@@ -177,19 +175,19 @@ class Avatar {
         object.children[1].scale.set(0.2, 0.2, 0.2);
         object.children[1].rotation.set(0.1, 3.4, 0);
         object.children[1].position.set(2, -0.8, -2);
-        that.rifle = object.children[1];
-        thatCamera.add(that.rifle);
-        that.activeWeapon = 0;
+        this.rifle = object.children[1];
+        this.camera.add(this.rifle);
+        this.activeWeapon = 0;
       });
     });
 
     mtlLoader.setPath('models/');
-    mtlLoader.load('material.mtl', function(materials) {
+    mtlLoader.load('material.mtl', (materials) => {
       materials.preload();
 
       objLoader.setMaterials(materials);
       objLoader.setPath('models/');
-      objLoader.load('shotgun.obj', function(object) {
+      objLoader.load('shotgun.obj', (object) => {
         texture = Three.ImageUtils.loadTexture('./models/shotgun.png');
         object.children[0].material = new Three.MeshLambertMaterial({ map: texture });
 
@@ -199,8 +197,8 @@ class Avatar {
         object.children[0].position.set(2, -1.4, -6);
         object.children[0].material.transparent = true;
         object.children[0].material.opacity = 0.0;
-        that.shotgun = object.children[0];
-        thatCamera.add(that.shotgun);
+        this.shotgun = object.children[0];
+        this.camera.add(this.shotgun);
       });
     });
   };
