@@ -94,7 +94,7 @@
     "physijs": "^1.0.4",
     "physijs-webpack": "^0.1.4",
     "stats": "^1.0.0",
-    "three": "^0.116.1"
+    "three": "^0.125.0"
   },
   "browserslist": {
     "production": [
